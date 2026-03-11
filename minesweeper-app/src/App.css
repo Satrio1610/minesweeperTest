@@ -40,3 +40,35 @@
 .read-the-docs {
   color: #888;
 } */
+
+.square 
+{
+  border-style: double;
+  height: 100px;
+  width: 100px;
+  text-align: center;
+}
+
+.square-clicked
+{
+  background-color: black;
+}
+
+.square-unclicked
+{
+  background-color:grey;
+}
+
+.square-content
+{
+  position:relative; 
+  font-size:45px;
+  font-weight: bolder;
+  color:gainsboro;
+  top:25%;
+}
+
+.boardRow
+{
+  display: flex;
+}
