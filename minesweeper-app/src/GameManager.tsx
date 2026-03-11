@@ -18,7 +18,7 @@ export default function GameManager() {
       let ms:boolean[] = Array(maxX * maxY).fill(false);
       let deployedMineCount:number = 0; 
 
-      while(deployedMineCount <30)
+      while(deployedMineCount <10)
       {
         let a: number = Math.floor(Math.min(Math.random() * 100,99));
         if(!ms[a]) 
@@ -61,15 +61,17 @@ export default function GameManager() {
         boardGame[flatIndex].IsClicked = true; 
 
         let mineNumber:number = 0; 
+        let clickableNeighbours:{x:number, y:number}[] = []; 
         if(x > 0 )
         {
           if(boardGame[y * maxX + x-1].IsMine) 
             {
               mineNumber++;
             } 
-            else if(!boardGame[y * maxX + x-1].IsClicked) 
+            else if(!boardGame[y * maxX + x-1].IsClicked && mineNumber == 0) 
             {
-              ProcessClick(x-1,y);
+              clickableNeighbours.push({x: x-1, y:y});
+              //ProcessClick(x-1,y);
             }
         } 
 
@@ -79,9 +81,10 @@ export default function GameManager() {
           {
             mineNumber++;
           } 
-          else if(!boardGame[(y-1) * maxX + x].IsClicked) 
+          else if(!boardGame[(y-1) * maxX + x].IsClicked && mineNumber == 0) 
           {
-            ProcessClick(x,y-1);
+            clickableNeighbours.push({x: x, y:y-1});
+            //ProcessClick(x,y-1);
           }          
         } 
 
@@ -91,9 +94,10 @@ export default function GameManager() {
           {
               mineNumber++;
           }
-          else if(!boardGame[(y - 1) * maxX + x-1].IsClicked)
+          else if(!boardGame[(y - 1) * maxX + x-1].IsClicked && mineNumber == 0)
           {
-            ProcessClick(x -1 , y -1);
+            clickableNeighbours.push({x: x-1, y:y-1});
+            //ProcessClick(x -1 , y -1);
           } 
         }
 
@@ -103,9 +107,10 @@ export default function GameManager() {
           {
             mineNumber++;
           } 
-          else if(!boardGame[y * maxX + x + 1].IsClicked) 
+          else if(!boardGame[y * maxX + x + 1].IsClicked && mineNumber == 0) 
           {
-            ProcessClick(x + 1, y);
+            clickableNeighbours.push({x: x + 1, y:y});
+            //ProcessClick(x + 1, y);
           }
         }
 
@@ -115,9 +120,10 @@ export default function GameManager() {
             {
               mineNumber++;
             }
-            else if(!boardGame[(y + 1) * maxX + x].IsClicked) 
+            else if(!boardGame[(y + 1) * maxX + x].IsClicked && mineNumber == 0) 
             {
-              ProcessClick(x, y + 1);
+              clickableNeighbours.push({x: x, y:y+1});
+              //ProcessClick(x, y + 1);
             }            
           } 
 
@@ -126,11 +132,11 @@ export default function GameManager() {
             if(boardGame[(y+1) * maxX + x + 1].IsMine)
             {
                 mineNumber++;
-            }
-            // }else if(!boardGame[(y+1) * maxX + x + 1].IsClicked)
-            // {
-            //   ProcessClick(x + 1, y +1);
-            // } 
+            }else if(!boardGame[(y+1) * maxX + x + 1].IsClicked)
+            {
+              clickableNeighbours.push({x: x + 1, y:y + 1});
+              //ProcessClick(x + 1, y +1);
+            } 
           }
 
         if(y > 0 && x + 1 < maxX ) 
@@ -139,10 +145,11 @@ export default function GameManager() {
             {
               mineNumber++; 
             } 
-            // else if(!boardGame[(y - 1) * maxX + x + 1].IsClicked)
-            // {
-            //   ProcessClick(x + 1, y - 1);
-            // } 
+            else if(!boardGame[(y - 1) * maxX + x + 1].IsClicked)
+            {
+              clickableNeighbours.push({x: x + 1, y:y-1});
+              //ProcessClick(x + 1, y - 1);
+            } 
             
           }
 
@@ -152,10 +159,17 @@ export default function GameManager() {
             {
               mineNumber++;
             }
-            // else if(!boardGame[(y + 1) * maxX + x - 1].IsClicked)
-            // {
-            //   ProcessClick(x - 1, y + 1);
-            // } 
+            else if(!boardGame[(y + 1) * maxX + x - 1].IsClicked)
+            {
+              clickableNeighbours.push({x: x - 1, y:y + 1});
+              //ProcessClick(x - 1, y + 1);
+            } 
+          }
+
+          while(mineNumber == 0 && clickableNeighbours.length > 0)
+          {
+              let n = clickableNeighbours.pop(); 
+              if(n !== undefined) ProcessClick(n.x, n.y); 
           }
 
           boardGame[flatIndex].Display = (mineNumber === 0)?"":mineNumber.toString(); 
@@ -163,7 +177,6 @@ export default function GameManager() {
 
     }
 
-     console.log("boardgame lalala " + boardGame.length);
     return <>
     <div>
       <Board x={maxX} y={maxY} boardData={boardGame}/>
