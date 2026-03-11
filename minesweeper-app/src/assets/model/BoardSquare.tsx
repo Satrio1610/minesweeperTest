@@ -8,6 +8,7 @@ export class BoardSquare {
 
   readonly IsMine:boolean = false; //ismine
   IsClicked:boolean = false; 
+  IsFlagged:boolean = false; 
   Display:string = "";
 
   constructor(x:number, y:number, m:boolean) {
@@ -15,11 +16,11 @@ export class BoardSquare {
     this.y = y;
     this.IsMine = m; 
     //this.ClickFunction = cf; 
-
   }
 
   GetDisplay(showAll:boolean)
     {
+      if(this.IsFlagged) return "O";
       if(this.IsClicked || showAll)
       {
         if(this.IsMine) return "X";

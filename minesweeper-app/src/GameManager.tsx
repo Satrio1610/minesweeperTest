@@ -3,20 +3,19 @@ import Board from './Board'
 import { useState } from 'react'
 import { BoardSquare } from './assets/model/BoardSquare';
 
-let maxX = 9;
-let maxY = 9;  
+const defaultMaxX = 9;
+const defaultMaxY = 9;  
+let defaultMineCount = 10;
 let initial = InstantiateBoardGame(); 
-
-function InstantiateBoardGame() 
+function InstantiateBoardGame(x:number = defaultMaxX, y:number = defaultMaxY, mineCount:number =defaultMineCount) 
     {
-      console.log("calling");
       let ts:BoardSquare[] = [];
-      let ms:boolean[] = Array(maxX * maxY).fill(false);
+      let ms:boolean[] = Array(x * y).fill(false);
       let deployedMineCount:number = 0; 
 
-      while(deployedMineCount <10)
+      while(deployedMineCount < mineCount)
       {
-        let a: number = Math.floor(Math.min(Math.random() * (maxX * maxY),(maxX * maxY)));
+        let a: number = Math.floor(Math.min(Math.random() * (x * y),(x * y) - 1));
         if(!ms[a]) 
           {
             deployedMineCount++; 
@@ -34,39 +33,68 @@ function InstantiateBoardGame()
       // ms[71] = true; 
       // ms[53] = true; 
 
-      for(let i = 0; i < maxY; i++ )
+      for(let i = 0; i < y; i++ )
       {
-        for(let j =0; j< maxX; j++)
+        for(let j =0; j< x; j++)
         {
-            ts[i*maxX + j] = new BoardSquare(j,i, ms[i*maxX + j]);
+            ts[i*x + j] = new BoardSquare(j,i, ms[i*x + j]);
         }
       }
       return ts;
     };
 
 export default function GameManager() {
-    let [maxX, setMaxX] = useState(9);
-    let [maxY, setMaxY] = useState(9); 
+    let [maxX, setMaxX] = useState(defaultMaxX);
+    let [maxY, setMaxY] = useState(defaultMaxY);
+    let [currentSquareFlagged,setCurrentSquareFlagged] = useState(defaultMineCount);
+    let [remainingMine, setRemainingMine] = useState(defaultMineCount); 
     let [isGameOver, setIsGameOver] = useState(false)
     let [boardGame,setBoardGame] = useState<BoardSquare[]>(initial);
 
     function OnClickSquare(x:number, y:number)
     {
-      
       if(isGameOver) return; 
       let nbg = boardGame.slice();
-      console.log("boardGame onclicksquare" + {boardGame} + " " + boardGame.length);
       ProcessClick(x,y, nbg);
       setBoardGame(nbg);
+    }
+
+    function OnRightClickSquare(x:number, y:number)
+    {
+      if(isGameOver) return; 
+      let nbg = boardGame.slice(); 
+      let flatIndex = maxX * y + x; 
+      let mineChange = 0; 
+      let squareChange = 0; 
+      if(!nbg[flatIndex].IsClicked)
+      {
+        nbg[flatIndex].IsFlagged= !nbg[flatIndex].IsFlagged;
+        if( nbg[flatIndex].IsFlagged )
+        {
+           if(nbg[flatIndex].IsMine) mineChange = -1; 
+           squareChange = -1; 
+        }
+        else 
+        {
+          if(nbg[flatIndex].IsMine) mineChange = 1; 
+          squareChange = 1;
+        }
+       
+        if(remainingMine + mineChange == 0) setIsGameOver(true);
+
+        setRemainingMine(remainingMine + mineChange);
+        setCurrentSquareFlagged(currentSquareFlagged + squareChange);
+        setBoardGame(nbg);
+      }
+
     }
 
     function ProcessClick(x:number, y:number, bsq:BoardSquare[])
     {
       //console.log("boardGame" + {bsq});
       let flatIndex:number = maxX * y + x; 
-      console.log(x + " " + y + " " + bsq.length + " " + maxX);
-      console.log(bsq[flatIndex]);
-      if(!bsq[flatIndex].IsClicked)
+    
+      if(!bsq[flatIndex].IsClicked && !bsq[flatIndex].IsFlagged)
       {
         bsq[flatIndex].IsClicked = true; 
 
@@ -190,15 +218,20 @@ export default function GameManager() {
     return <>
     <div>
       <div>
-        <Board x={maxX} y={maxY} boardData={boardGame} isGameOver={isGameOver} sqFunction={OnClickSquare}/>
+        <Board x={maxX} y={maxY} boardData={boardGame} isGameOver={isGameOver} sqFunction={OnClickSquare} flagFunction={OnRightClickSquare}/>
       </div>
       <div>
         <button onClick={(e) => {
           e.preventDefault();
           let a = InstantiateBoardGame();
           setBoardGame(a);
+          setCurrentSquareFlagged(defaultMineCount);
+          setRemainingMine(defaultMineCount);
           setIsGameOver(false);
-        }}>RESET</button>
+        }}>{(remainingMine === 0 && isGameOver )? "YOU WIN! NEW GAME" :"RESET"}</button>
+        <div>
+          <div>remaining to be flagged {currentSquareFlagged}</div>
+        </div>
       </div>
     </div>
     </>
