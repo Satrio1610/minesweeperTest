@@ -21,7 +21,6 @@ function InstantiateBoardGame()
           {
             deployedMineCount++; 
             ms[a] = true; 
-            console.log(a + " is mine");
           }
       }
       // ms[13] = true; 
@@ -42,10 +41,6 @@ function InstantiateBoardGame()
             ts[i*maxX + j] = new BoardSquare(j,i, ms[i*maxX + j]);
         }
       }
-
-      console.log(new Date() + "; board square count: " + ts.length);
-      // for(let i =0; i < ts.length; i++)
-      // {console.log(ts[i].x + " " + ts[i].y + " " + ts[i].IsMine);}
       return ts;
     };
 
@@ -88,7 +83,6 @@ export default function GameManager() {
               else if(!bsq[y * maxX + x-1].IsClicked && mineNumber == 0) 
               {
                 clickableNeighbours.push({x: x-1, y:y});
-                //ProcessClick(x-1,y);
               }
           } 
 
@@ -101,7 +95,6 @@ export default function GameManager() {
             else if(!bsq[(y-1) * maxX + x].IsClicked && mineNumber == 0) 
             {
               clickableNeighbours.push({x: x, y:y-1});
-              //ProcessClick(x,y-1);
             }          
           } 
 
@@ -114,7 +107,6 @@ export default function GameManager() {
             else if(!bsq[(y - 1) * maxX + x-1].IsClicked && mineNumber == 0)
             {
               clickableNeighbours.push({x: x-1, y:y-1});
-              //ProcessClick(x -1 , y -1);
             } 
           }
 
@@ -127,7 +119,6 @@ export default function GameManager() {
             else if(!bsq[y * maxX + x + 1].IsClicked && mineNumber == 0) 
             {
               clickableNeighbours.push({x: x + 1, y:y});
-              //ProcessClick(x + 1, y);
             }
           }
 
@@ -140,7 +131,6 @@ export default function GameManager() {
               else if(!bsq[(y + 1) * maxX + x].IsClicked && mineNumber == 0) 
               {
                 clickableNeighbours.push({x: x, y:y+1});
-                //ProcessClick(x, y + 1);
               }            
             } 
 
@@ -152,7 +142,6 @@ export default function GameManager() {
               }else if(!bsq[(y+1) * maxX + x + 1].IsClicked)
               {
                 clickableNeighbours.push({x: x + 1, y:y + 1});
-                //ProcessClick(x + 1, y +1);
               } 
             }
 
@@ -165,7 +154,6 @@ export default function GameManager() {
               else if(!bsq[(y - 1) * maxX + x + 1].IsClicked)
               {
                 clickableNeighbours.push({x: x + 1, y:y-1});
-                //ProcessClick(x + 1, y - 1);
               } 
               
             }
@@ -179,7 +167,6 @@ export default function GameManager() {
               else if(!bsq[(y + 1) * maxX + x - 1].IsClicked)
               {
                 clickableNeighbours.push({x: x - 1, y:y + 1});
-                //ProcessClick(x - 1, y + 1);
               } 
             }
 
@@ -202,7 +189,17 @@ export default function GameManager() {
 
     return <>
     <div>
-      <Board x={maxX} y={maxY} boardData={boardGame} isGameOver={isGameOver} sqFunction={OnClickSquare}/>
+      <div>
+        <Board x={maxX} y={maxY} boardData={boardGame} isGameOver={isGameOver} sqFunction={OnClickSquare}/>
+      </div>
+      <div>
+        <button onClick={(e) => {
+          e.preventDefault();
+          let a = InstantiateBoardGame();
+          setBoardGame(a);
+          setIsGameOver(false);
+        }}>RESET</button>
+      </div>
     </div>
     </>
 }
