@@ -1,12 +1,13 @@
-import { BoardSquare } from "./assets/model/BoardSquare"
+import { BoardSquare, type squareFunction } from "./assets/model/BoardSquare"
 
-export default function Square({data}:{data:BoardSquare}) {
+export default function Square({data, isGameOver, sqFunction}:{data:BoardSquare, isGameOver:boolean, sqFunction:squareFunction}) {
 
     let squareClass ='square' + ((data.IsClicked)? ' square-clicked':' square-unclicked');
+    let squareContentClass =  (data.IsClicked && data.IsMine)? 'square-mine': 'square-content';
     return <div className={squareClass} onClick={(e) => {
         e.preventDefault();
         console.log("click!")
-        data.ClickFunction(data.x,data.y)}} >
-                <div className='square-content'>{(data.IsMine)? "mine":(data.IsClicked?data.Display:"")}</div>
+        sqFunction(data.x,data.y)}} >
+                <div className={squareContentClass}>{data.GetDisplay(isGameOver)}</div>
             </div>
 }

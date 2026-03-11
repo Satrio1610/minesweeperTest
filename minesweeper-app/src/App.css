@@ -44,14 +44,16 @@
 .square 
 {
   border-style: double;
-  height: 75px;
-  width: 75px;
+  height: 50px;
+  width: 50px;
   text-align: center;
+  font-size:25px;
+  font-weight: bolder;
+  border-color: white;
 }
 
 .square-clicked
 {
-  border-color: white;
   background-color: black;
 }
 
@@ -60,11 +62,17 @@
   background-color:grey;
 }
 
+.square-mine
+{
+  
+  position:relative; 
+  color:red;
+  top:25%;
+}
+
 .square-content
 {
   position:relative; 
-  font-size:25px;
-  font-weight: bolder;
   color:gainsboro;
   top:25%;
 }

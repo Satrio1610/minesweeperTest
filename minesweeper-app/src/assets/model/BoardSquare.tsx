@@ -10,10 +10,20 @@ export class BoardSquare {
   IsClicked:boolean = false; 
   Display:string = "";
 
-  constructor(x:number, y:number, m:boolean, cf:squareFunction) {
+  constructor(x:number, y:number, m:boolean) {
     this.x = x; 
     this.y = y;
     this.IsMine = m; 
-    this.ClickFunction = cf; 
+    //this.ClickFunction = cf; 
+
   }
+
+  GetDisplay(showAll:boolean)
+    {
+      if(this.IsClicked || showAll)
+      {
+        if(this.IsMine) return "X";
+        return this.Display; 
+      }
+    }
 }

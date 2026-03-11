@@ -3,15 +3,11 @@ import Board from './Board'
 import { useState } from 'react'
 import { BoardSquare } from './assets/model/BoardSquare';
 
+let maxX = 9;
+let maxY = 9;  
+let initial = InstantiateBoardGame(); 
 
-export default function GameManager() {
-    let [maxX, setMaxX] = useState(10);
-    let [maxY, setMaxY] = useState(10); 
-    let [boardGame,setBoardGame] = useState<BoardSquare[]>(InstantiateBoardGame());
-    let [lastUpdateDate, setLastUpdateDate] = useState<Date>(new Date());
-
-    
-    function InstantiateBoardGame() 
+function InstantiateBoardGame() 
     {
       console.log("calling");
       let ts:BoardSquare[] = [];
@@ -20,20 +16,30 @@ export default function GameManager() {
 
       while(deployedMineCount <10)
       {
-        let a: number = Math.floor(Math.min(Math.random() * 100,99));
+        let a: number = Math.floor(Math.min(Math.random() * (maxX * maxY),(maxX * maxY)));
         if(!ms[a]) 
           {
             deployedMineCount++; 
             ms[a] = true; 
-            console.log(a + "is mine");
-          } 
+            console.log(a + " is mine");
+          }
       }
-      
+      // ms[13] = true; 
+      // ms[45] = true; 
+      // ms[54] = true; 
+      // ms[63] = true; 
+      // ms[64] = true; 
+      // ms[73] = true; 
+      // ms[75] = true; 
+      // ms[67] = true; 
+      // ms[71] = true; 
+      // ms[53] = true; 
+
       for(let i = 0; i < maxY; i++ )
       {
         for(let j =0; j< maxX; j++)
         {
-            ts[i*maxX + j] = new BoardSquare(j,i, ms[i*maxX + j], OnClickSquare);
+            ts[i*maxX + j] = new BoardSquare(j,i, ms[i*maxX + j]);
         }
       }
 
@@ -43,143 +49,160 @@ export default function GameManager() {
       return ts;
     };
 
+export default function GameManager() {
+    let [maxX, setMaxX] = useState(9);
+    let [maxY, setMaxY] = useState(9); 
+    let [isGameOver, setIsGameOver] = useState(false)
+    let [boardGame,setBoardGame] = useState<BoardSquare[]>(initial);
+
     function OnClickSquare(x:number, y:number)
     {
+      
+      if(isGameOver) return; 
+      let nbg = boardGame.slice();
       console.log("boardGame onclicksquare" + {boardGame} + " " + boardGame.length);
-      ProcessClick(x,y);
-      setLastUpdateDate(new Date());
+      ProcessClick(x,y, nbg);
+      setBoardGame(nbg);
     }
 
-    function ProcessClick(x:number, y:number)
+    function ProcessClick(x:number, y:number, bsq:BoardSquare[])
     {
-      console.log("boardGame" + {boardGame});
+      //console.log("boardGame" + {bsq});
       let flatIndex:number = maxX * y + x; 
-      console.log(x + " " + y + " " + boardGame.length + " " + maxX);
-      console.log(boardGame[flatIndex]);
-      if(!boardGame[flatIndex].IsClicked)
+      console.log(x + " " + y + " " + bsq.length + " " + maxX);
+      console.log(bsq[flatIndex]);
+      if(!bsq[flatIndex].IsClicked)
       {
-        boardGame[flatIndex].IsClicked = true; 
+        bsq[flatIndex].IsClicked = true; 
 
-        let mineNumber:number = 0; 
-        let clickableNeighbours:{x:number, y:number}[] = []; 
-        if(x > 0 )
+        if(!bsq[flatIndex].IsMine)
         {
-          if(boardGame[y * maxX + x-1].IsMine) 
+          let mineNumber:number = 0; 
+          let clickableNeighbours:{x:number, y:number}[] = []; 
+          if(x > 0 )
+          {
+            if(bsq[y * maxX + x-1].IsMine) 
+              {
+                mineNumber++;
+              } 
+              else if(!bsq[y * maxX + x-1].IsClicked && mineNumber == 0) 
+              {
+                clickableNeighbours.push({x: x-1, y:y});
+                //ProcessClick(x-1,y);
+              }
+          } 
+
+          if(y > 0 )
+          {
+            if(bsq[(y-1) * maxX + x].IsMine) 
             {
               mineNumber++;
             } 
-            else if(!boardGame[y * maxX + x-1].IsClicked && mineNumber == 0) 
+            else if(!bsq[(y-1) * maxX + x].IsClicked && mineNumber == 0) 
             {
-              clickableNeighbours.push({x: x-1, y:y});
-              //ProcessClick(x-1,y);
-            }
-        } 
-
-        if(y > 0 )
-        {
-          if(boardGame[(y-1) * maxX + x].IsMine) 
-          {
-            mineNumber++;
-          } 
-          else if(!boardGame[(y-1) * maxX + x].IsClicked && mineNumber == 0) 
-          {
-            clickableNeighbours.push({x: x, y:y-1});
-            //ProcessClick(x,y-1);
-          }          
-        } 
-
-        if(x > 0 && y > 0) 
-        {
-          if(boardGame[(y - 1) * maxX + x-1].IsMine) 
-          {
-              mineNumber++;
-          }
-          else if(!boardGame[(y - 1) * maxX + x-1].IsClicked && mineNumber == 0)
-          {
-            clickableNeighbours.push({x: x-1, y:y-1});
-            //ProcessClick(x -1 , y -1);
-          } 
-        }
-
-        if(x + 1 < maxX) 
-        {
-          if(boardGame[y * maxX + x + 1].IsMine) 
-          {
-            mineNumber++;
-          } 
-          else if(!boardGame[y * maxX + x + 1].IsClicked && mineNumber == 0) 
-          {
-            clickableNeighbours.push({x: x + 1, y:y});
-            //ProcessClick(x + 1, y);
-          }
-        }
-
-        if(y + 1 < maxY)
-          {
-            if(boardGame[(y + 1) * maxX + x].IsMine) 
-            {
-              mineNumber++;
-            }
-            else if(!boardGame[(y + 1) * maxX + x].IsClicked && mineNumber == 0) 
-            {
-              clickableNeighbours.push({x: x, y:y+1});
-              //ProcessClick(x, y + 1);
-            }            
+              clickableNeighbours.push({x: x, y:y-1});
+              //ProcessClick(x,y-1);
+            }          
           } 
 
-        if(x + 1 < maxX && y+1 < maxY) 
+          if(x > 0 && y > 0) 
           {
-            if(boardGame[(y+1) * maxX + x + 1].IsMine)
+            if(bsq[(y - 1) * maxX + x-1].IsMine) 
             {
                 mineNumber++;
-            }else if(!boardGame[(y+1) * maxX + x + 1].IsClicked)
+            }
+            else if(!bsq[(y - 1) * maxX + x-1].IsClicked && mineNumber == 0)
             {
-              clickableNeighbours.push({x: x + 1, y:y + 1});
-              //ProcessClick(x + 1, y +1);
+              clickableNeighbours.push({x: x-1, y:y-1});
+              //ProcessClick(x -1 , y -1);
             } 
           }
 
-        if(y > 0 && x + 1 < maxX ) 
+          if(x + 1 < maxX) 
           {
-            if(boardGame[(y - 1) * maxX + x + 1].IsMine)
-            {
-              mineNumber++; 
-            } 
-            else if(!boardGame[(y - 1) * maxX + x + 1].IsClicked)
-            {
-              clickableNeighbours.push({x: x + 1, y:y-1});
-              //ProcessClick(x + 1, y - 1);
-            } 
-            
-          }
-
-        if(y + 1 < maxY && x > 0) 
-          {
-            if(boardGame[(y + 1) * maxX + x - 1].IsMine)
+            if(bsq[y * maxX + x + 1].IsMine) 
             {
               mineNumber++;
-            }
-            else if(!boardGame[(y + 1) * maxX + x - 1].IsClicked)
-            {
-              clickableNeighbours.push({x: x - 1, y:y + 1});
-              //ProcessClick(x - 1, y + 1);
             } 
+            else if(!bsq[y * maxX + x + 1].IsClicked && mineNumber == 0) 
+            {
+              clickableNeighbours.push({x: x + 1, y:y});
+              //ProcessClick(x + 1, y);
+            }
           }
 
-          while(mineNumber == 0 && clickableNeighbours.length > 0)
-          {
-              let n = clickableNeighbours.pop(); 
-              if(n !== undefined) ProcessClick(n.x, n.y); 
-          }
+          if(y + 1 < maxY)
+            {
+              if(bsq[(y + 1) * maxX + x].IsMine) 
+              {
+                mineNumber++;
+              }
+              else if(!bsq[(y + 1) * maxX + x].IsClicked && mineNumber == 0) 
+              {
+                clickableNeighbours.push({x: x, y:y+1});
+                //ProcessClick(x, y + 1);
+              }            
+            } 
 
-          boardGame[flatIndex].Display = (mineNumber === 0)?"":mineNumber.toString(); 
+          if(x + 1 < maxX && y+1 < maxY) 
+            {
+              if(bsq[(y+1) * maxX + x + 1].IsMine)
+              {
+                  mineNumber++;
+              }else if(!bsq[(y+1) * maxX + x + 1].IsClicked)
+              {
+                clickableNeighbours.push({x: x + 1, y:y + 1});
+                //ProcessClick(x + 1, y +1);
+              } 
+            }
+
+          if(y > 0 && x + 1 < maxX ) 
+            {
+              if(bsq[(y - 1) * maxX + x + 1].IsMine)
+              {
+                mineNumber++; 
+              } 
+              else if(!bsq[(y - 1) * maxX + x + 1].IsClicked)
+              {
+                clickableNeighbours.push({x: x + 1, y:y-1});
+                //ProcessClick(x + 1, y - 1);
+              } 
+              
+            }
+
+          if(y + 1 < maxY && x > 0) 
+            {
+              if(bsq[(y + 1) * maxX + x - 1].IsMine)
+              {
+                mineNumber++;
+              }
+              else if(!bsq[(y + 1) * maxX + x - 1].IsClicked)
+              {
+                clickableNeighbours.push({x: x - 1, y:y + 1});
+                //ProcessClick(x - 1, y + 1);
+              } 
+            }
+
+            while(mineNumber == 0 && clickableNeighbours.length > 0)
+            {
+                let n = clickableNeighbours.pop(); 
+                if(n !== undefined) ProcessClick(n.x, n.y, bsq); 
+            }
+
+            bsq[flatIndex].Display = (mineNumber === 0)?"":mineNumber.toString(); 
+        }
+        else 
+        {
+          console.log("GAME OVER");
+          setIsGameOver(true); 
+        }
       }
 
     }
 
     return <>
     <div>
-      <Board x={maxX} y={maxY} boardData={boardGame}/>
+      <Board x={maxX} y={maxY} boardData={boardGame} isGameOver={isGameOver} sqFunction={OnClickSquare}/>
     </div>
     </>
 }

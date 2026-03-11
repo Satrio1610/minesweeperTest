@@ -1,7 +1,7 @@
 import Square from './square';
-import { BoardSquare } from './assets/model/BoardSquare';
+import { BoardSquare, type squareFunction } from './assets/model/BoardSquare';
 
-export default function Board({x,y,boardData}:{x:number, y:number, boardData:BoardSquare[]}) {
+export default function Board({x,y,boardData, isGameOver, sqFunction}:{x:number, y:number, boardData:BoardSquare[], isGameOver:boolean, sqFunction:squareFunction}) {
 
           let fullBoard = []; 
           for(let i = 0; i < y; i++)
@@ -9,7 +9,7 @@ export default function Board({x,y,boardData}:{x:number, y:number, boardData:Boa
             let result = [];
             for(let j = 0; j < x; j++)
             {
-              result[j] = <Square data={boardData[i*x + j]} key={i * x + j}/>
+              result[j] = <Square data={boardData[i*x + j]} key={i * x + j} isGameOver={isGameOver} sqFunction={sqFunction}/>
             }
             
             fullBoard[i] = <div className="boardRow" key={'r'+ i}>{result}</div>
